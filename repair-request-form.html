@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>法人向け修理依頼フォーム（修正版）</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap">
+  <style>
+    body { font-family: "Noto Sans JP", sans-serif; }
+    label.required:after { content: " *"; color: #DC1100; }
+    .custom-btn { background: #ff931e; color: #fff; border: none; border-radius: .25rem; padding: .5rem 1.5rem; font-weight: 600; transition: background 0.2s; }
+    .custom-btn:hover { background: #e67e00;}
+    .section-title { border-bottom: 1px solid #ccc; color:#000; font-weight:bold; padding:.5rem 0; margin-bottom:.7rem; font-size: 1.1rem;}
+    .input-row { display:flex; flex-wrap:wrap; gap:1rem; }
+    .input-row>div { flex:1 1 0;}
+    .input-cols-4 > div {flex:0 0 23%;}
+    .form-box { background:#fff; border:1px solid #ccc; border-radius:.5rem; padding:1.3rem 1.2rem; margin-bottom:2rem;}
+    textarea { resize: vertical; }
+    .form-note { font-size: 0.94rem; color:#475569;}
+    .radio-group label { margin-right:1.5rem;}
+    .file-guideline { font-size:0.92rem;}
+    .checkbox { transform: scale(1.2); }
+    .required-field { border: solid 1px #DC1100 !important; background-color: #FEF0F1 !important; }
+    .category-btn { background: #fff; color: #333; border: 1px solid #ff931e; border-radius: .25rem; padding: .5rem 1.5rem; font-weight: 600; transition: background 0.2s; }
+    .category-btn:hover { background: #ff931e; color: #fff; }
+    .category-btn.active { background: #ff931e; color: #fff; }
+    @media (max-width:1000px) {
+      .input-row, .input-cols-4 {flex-direction:column;}
+      .input-cols-4 > div {flex-basis:auto;}
+    }
+  </style>
+</head>
+<body class="bg-blue-50 py-5">
+  <div class="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8">
+    <h1 class="text-2xl font-bold mb-4 text-blue-900">法人向け修理依頼フォーム（修正版）</h1>
+    <!-- 動的UI：カテゴリ〜 -->
+    <div class="form-box">
+      <div class="section-title">カテゴリ選択 <span class="text-red-500">*</span></div>
+      <div id="category-buttons" class="flex flex-wrap gap-4 mb-4">
+        <button class="category-btn" data-category="トイレ">トイレ</button>
+        <button class="category-btn" data-category="キッチン">キッチン</button>
+        <button class="category-btn" data-category="バスルーム">バスルーム</button>
+        <button class="category-btn" data-category="洗面">洗面</button>
+        <button class="category-btn" data-category="内装・収納">内装・収納</button>
+        <button class="category-btn" data-category="照明器具・電球">照明器具・電球</button>
+      </div>
+      <div id="phenomenon-section" class="mb-4 hidden">
+        <label class="font-semibold mb-2 block">不具合現象 <span class="text-red-500">*</span></label>
+        <div id="phenomenon-buttons" class="flex flex-wrap gap-3"></div>
+      </div>
+      <div id="detail-section" class="mb-2 hidden">
+        <label class="font-semibold mb-2 block">不具合詳細 <span class="text-red-500">*</span></label>
+        <select id="detail-select" class="border border-blue-300 rounded-md px-3 py-2 w-full"></select>
+      </div>
+    </div>
+    <!-- 症状記入欄 -->
+    <div class="form-box">
+      <div class="section-title">症状記入欄 <span class="text-red-500">*</span></div>
+      <label class="block mb-2 font-semibold required">症状（故障箇所や事象について、ご入力願います。）</label>
+      <textarea rows="3" class="w-full border required-field rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200" placeholder="例）便器のリモコン操作が反応しなくなった"></textarea>
+      <!-- 画像添付 -->
+      <div class="mt-8">
+        <div class="font-semibold mb-2">画像添付（最大3枚）</div>
+        <div class="flex flex-wrap gap-6 mb-2">
+          <div class="flex flex-col items-center">
+            <span class="text-sm mb-1">・1枚目を選択する</span>
+            <label class="custom-btn cursor-pointer"><input type="file" accept=".jpg,.jpeg,.png,.gif,.bmp" class="hidden" id="file1">画像選択</label>
+            <span class="file-guideline text-xs mt-1" id="file1name"></span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-sm mb-1">・2枚目を選択する</span>
+            <label class="custom-btn cursor-pointer"><input type="file" accept=".jpg,.jpeg,.png,.gif,.bmp" class="hidden" id="file2">画像選択</label>
+            <span class="file-guideline text-xs mt-1" id="file2name"></span>
+          </div>
+          <div class="flex flex-col items-center">
+            <span class="text-sm mb-1">・3枚目を選択する</span>
+            <label class="custom-btn cursor-pointer"><input type="file" accept=".jpg,.jpeg,.png,.gif,.bmp" class="hidden" id="file3">画像選択</label>
+            <span class="file-guideline text-xs mt-1" id="file3name"></span>
+          </div>
+        </div>
+        <div class="mb-1 text-gray-700 text-sm">
+          不具合箇所や状態が確認できる画像を添付してください。<br>
+          <span class="file-guideline">※1枚のデータ容量: 3MB未満　ファイル形式: jpg, jpeg, png, gif, bmp</span>
+        </div>
+      </div>
+    </div>
+    <!-- 依頼・請求 -->
+    <div class="form-box">
+      <div class="section-title">依頼・請求</div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【訪問希望日】</div>
+        <div class="input-row gap-2 mb-2">
+          <div>
+            <label class="font-medium mb-1 block">訪問希望日</label>
+            <input type="date" class="border border-ccc rounded-md px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label class="font-medium mb-1 block">時</label>
+            <select class="border border-ccc rounded-md px-3 py-2 w-full">
+              <option value="9:00">9:00</option>
+              <option value="10:00">10:00</option>
+              <option value="11:00">11:00</option>
+              <option value="12:00">12:00</option>
+              <option value="13:00">13:00</option>
+              <option value="14:00">14:00</option>
+              <option value="15:00">15:00</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
+            </select>
+          </div>
+        </div>
+        <div class="input-row gap-2 mb-2">
+          <div>
+            <label class="font-medium mb-1 block">お客様依頼日</label>
+            <div class="flex gap-2 items-center">
+              <input type="number" min="2020" max="2099" value="2025" id="reqYear" class="border border-ccc rounded-md px-2 py-1 w-20" />
+              <span>年</span>
+              <input type="number" min="1" max="12" class="border border-ccc rounded-md px-2 py-1 w-14" />
+              <span>月</span>
+              <input type="number" min="1" max="31" class="border border-ccc rounded-md px-2 py-1 w-14" />
+              <span>日</span>
+            </div>
+          </div>
+          <div>
+            <label class="font-medium mb-1 block">故障発生日</label>
+            <div class="flex gap-2 items-center">
+              <input type="number" min="2020" max="2099" value="2025" id="failYear" class="border border-ccc rounded-md px-2 py-1 w-20" />
+              <span>年</span>
+              <input type="number" min="1" max="12" class="border border-ccc rounded-md px-2 py-1 w-14" />
+              <span>月</span>
+              <input type="number" min="1" max="31" class="border border-ccc rounded-md px-2 py-1 w-14" />
+              <span>日</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【お客様使用期間】 <span class="text-red-500">*</span></div>
+        <label class="block required">使用開始日</label>
+        <div class="flex gap-2 items-center mb-2">
+          <input type="number" min="1900" max="2099" value="2020" required id="startYear" class="border required-field rounded-md px-3 py-2 w-28" placeholder="年（例:2020）" />
+          <span>年</span>
+          <input type="number" min="1" max="12" id="startMonth" class="border border-ccc rounded-md px-3 py-2 w-20" placeholder="月" />
+          <span>月</span>
+          <input type="number" min="1" max="31" id="startDay" class="border border-ccc rounded-md px-3 py-2 w-20" placeholder="日" />
+          <span>日</span>
+        </div>
+        <label class="block required">使用期間</label>
+        <div class="flex gap-2 items-center mb-1">
+          <input type="number" min="0" id="periodYears" class="border required-field rounded-md px-3 py-2 w-24" placeholder="年" required readonly />
+          <span>年</span>
+          <input type="number" min="0" max="11" id="periodMonths" class="border required-field rounded-md px-3 py-2 w-20" placeholder="ヶ月" required readonly/>
+          <span>ヶ月</span>
+        </div>
+        <span class="form-note">使用開始日は年のみ必須、期間は自動計算されます。</span>
+      </div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【請求メモ】</div>
+        <input type="text" class="border border-ccc rounded-md px-3 py-2 w-full" placeholder="費用請求に関する注意事項" />
+      </div>
+    </div>
+    <!-- 自社情報 -->
+    <div class="form-box">
+      <div class="section-title">自社情報</div>
+      <label class="required">会社名</label>
+      <input type="text" class="border required-field rounded-md px-3 py-2 mb-2 w-full" />
+      
+      <label class="required block mb-1">〒郵便番号</label>
+      <div class="flex gap-2 mb-2">
+        <input type="text" class="border required-field rounded-md px-3 py-2" id="companyZip" maxlength="7" placeholder="1234567" style="width:120px;">
+        <button type="button" class="custom-btn" onclick="fetchAddress('companyZip','companyPref','companyCity')"><i class="fa fa-search"></i> 郵便番号から住所入力</button>
+      </div>
+      <div class="input-row input-cols-4 gap-2 mb-2">
+        <div>
+          <label class="block mb-1 required">都道府県</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="companyPref" readonly />
+        </div>
+        <div>
+          <label class="block mb-1 required">市区町村</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="companyCity" readonly />
+        </div>
+        <div>
+          <label class="block mb-1 required">番地</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+        </div>
+        <div>
+          <label class="block mb-1 required">建物名・部屋番号</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+        </div>
+      </div>
+      <label class="required mt-2 block">担当者</label>
+      <input type="text" class="border required-field rounded-md px-3 py-2 w-full mb-2" />
+      <label class="required block">e-mail</label>
+      <input type="email" class="border required-field rounded-md px-3 py-2 w-full mb-2" />
+      <label class="block required">確認用e-mail</label>
+      <input type="email" class="border required-field rounded-md px-3 py-2 w-full mb-2" />
+      <div class="mb-2 flex items-center space-x-2">
+        <input type="checkbox" id="noNotifySelf" class="checkbox"><label for="noNotifySelf">通知不要（進捗通知不要時チェック）</label>
+      </div>
+      <div>
+        <input type="checkbox" id="addEmailSelf" class="checkbox"><label for="addEmailSelf" class="ml-1">e-mail追加</label>
+      </div>
+    </div>
+    <!-- 有料時の請求先 -->
+    <div class="form-box">
+      <div class="section-title">有料時の請求先</div>
+      <div class="mb-2 radio-group">
+        <label><input type="radio" name="billto" checked class="mr-1">修理させていただくお客様</label>
+        <label><input type="radio" name="billto" class="mr-1">御社</label>
+      </div>
+      <div class="font-semibold mb-1">【販売店代理店（ルート1）】</div>
+      <label class="required block mb-1">会社名</label>
+      <input type="text" class="border required-field rounded-md px-3 py-2 mb-2 w-full" />
+      
+      <label class="required block mb-1">〒郵便番号</label>
+      <div class="flex gap-2 mb-2">
+        <input type="text" class="border required-field rounded-md px-3 py-2" id="dealerZip" maxlength="7" placeholder="1234567" style="width:120px;">
+        <button type="button" class="custom-btn" onclick="fetchAddress('dealerZip','dealerPref','dealerCity')"><i class="fa fa-search"></i> 郵便番号から住所入力</button>
+      </div>
+      <div class="input-row input-cols-4 gap-2 mb-2">
+        <div>
+          <label class="block mb-1 required">都道府県</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="dealerPref" readonly />
+        </div>
+        <div>
+          <label class="block mb-1 required">市区町村</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="dealerCity" readonly />
+        </div>
+        <div>
+          <label class="block mb-1 required">番地</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+        </div>
+        <div>
+          <label class="block mb-1 required">建物名・部屋番号</label>
+          <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+        </div>
+      </div>
+      <label class="block mt-2">担当者</label>
+      <input type="text" class="border border-ccc rounded-md px-3 py-2 w-full mb-2" />
+      <label class="block">e-mail</label>
+      <input type="email" class="border border-ccc rounded-md px-3 py-2 w-full mb-2" />
+      <label class="block">確認用e-mail</label>
+      <input type="email" class="border border-ccc rounded-md px-3 py-2 w-full mb-2" />
+      <div>
+        <input type="checkbox" id="addEmailDealer" class="checkbox"><label for="addEmailDealer" class="ml-1">e-mail追加</label>
+      </div>
+    </div>
+    <div class="form-box flex items-center mb-4">
+      <input type="checkbox" id="addReqOrg" class="checkbox"><label for="addReqOrg" class="ml-2">依頼元追加</label>
+    </div>
+    <!-- お客様情報 -->
+    <div class="form-box">
+      <div class="section-title">お客様情報</div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【お客様名】</div>
+        <div class="input-row gap-2 mb-2">
+          <div>
+            <label class="block mb-1 required">姓</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label class="block mb-1 required">名</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+        </div>
+        <div class="input-row gap-2 mb-2">
+          <div>
+            <label class="block mb-1 required">セイ</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label class="block mb-1 required">メイ</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【住所】</div>
+        <label class="required block mb-1">〒郵便番号</label>
+        <div class="flex gap-2 mb-2">
+          <input type="text" class="border required-field rounded-md px-3 py-2" id="cusZip" maxlength="7" placeholder="1234567" style="width:120px;">
+          <button type="button" class="custom-btn" onclick="fetchAddress('cusZip','cusPref','cusCity')"><i class="fa fa-search"></i> 郵便番号から住所入力</button>
+        </div>
+        <div class="input-row input-cols-4 gap-2 mb-1">
+          <div>
+            <label class="block mb-1 required">都道府県</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="cusPref" readonly />
+          </div>
+          <div>
+            <label class="block mb-1 required">市区町村</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full bg-gray-50" id="cusCity" readonly />
+          </div>
+          <div>
+            <label class="block mb-1 required">番地</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+          <div>
+            <label class="block mb-1 required">建物名・部屋番号</label>
+            <input type="text" class="border required-field rounded-md px-3 py-2 w-full" />
+          </div>
+        </div>
+        <div class="mt-2">
+          <input type="checkbox" class="checkbox" id="officeAddress">
+          <label for="officeAddress" class="ml-1 form-note">ご自宅以外（事務所など）の場合、チェックしてください</label>
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【電話番号】 <span class="text-red-500">*</span></div>
+        <input type="tel" class="border required-field rounded-md px-3 py-2 w-full" required placeholder="電話番号" />
+      </div>
+      <div class="mb-2">
+        <div class="font-semibold mb-1">【メール】</div>
+        <label class="block mb-1 required">e-mail</label>
+        <input type="email" class="border required-field rounded-md px-3 py-2 w-full mb-2" />
+        <label class="block mb-1 required">確認用e-mail</label>
+        <input type="email" class="border required-field rounded-md px-3 py-2 w-full" />
+      </div>
+      <div>
+        <div class="font-semibold mb-1">【補足】</div>
+        <textarea rows="2" class="w-full border border-ccc rounded-md px-3 py-2" placeholder="連絡がつく時間帯、連絡方法、現場の状況、お客様以外（工務店様など）の連絡先などを記述してください"></textarea>
+      </div>
+    </div>
+  </div>
+<script>
+// 動的UI：カテゴリ→現象→詳細
+const PHENOMENON_OPTIONS = {
+  "トイレ": [
+    { label:"リモコン操作", details:["動かない","リモコンの表示がおかしい","設定が変わる・変更ができない"] },
+    { label:"おしり・ビデ洗浄水", details:["洗浄水が出ない","ノズルが動かない"] },
+    { label:"商品本体部", details:["ふたが開かない","異音がする"] },
+    { label:"水漏れ", details:["床が濡れる","配管から水漏れ"] },
+    { label:"破損・がたつき・外観等", details:["便座割れ","本体がぐらつく"] },
+    { label:"その他機能", details:["その他（詳細を症状欄に記入）"] }
+  ]
+};
+const CATEGORIES = ["トイレ","キッチン","バスルーム","洗面","内装・収納","照明器具・電球"];
+document.addEventListener("DOMContentLoaded", () => {
+  // 動的UI
+  const cats = document.querySelectorAll("#category-buttons button");
+  const phenoSec = document.getElementById("phenomenon-section");
+  const phenoBtns = document.getElementById("phenomenon-buttons");
+  const detailSec = document.getElementById("detail-section");
+  const detailSel = document.getElementById("detail-select");
+  cats.forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      cats.forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+      phenoBtns.innerHTML = "";
+      detailSel.innerHTML = "";
+      detailSec.classList.add("hidden");
+      if(btn.dataset.category==="トイレ"){
+        PHENOMENON_OPTIONS["トイレ"].forEach((pheno,i)=>{
+          const pbtn = document.createElement("button");
+          pbtn.className = "category-btn";
+          pbtn.textContent = pheno.label;
+          pbtn.addEventListener("click", ()=>{
+            [...phenoBtns.children].forEach(b=>b.classList.remove("active"));
+            pbtn.classList.add("active");
+            detailSel.innerHTML = "";
+            pheno.details.forEach(d=>{
+              const opt = document.createElement("option");
+              opt.text = d;
+              detailSel.add(opt);
+            });
+            detailSec.classList.remove("hidden");
+          });
+          phenoBtns.appendChild(pbtn);
+        });
+        phenoSec.classList.remove("hidden");
+      } else {
+        // 簡易表示
+        const pbtn = document.createElement("button");
+        pbtn.className = "category-btn";
+        pbtn.textContent = "該当する現象を症状欄にご記入ください";
+        pbtn.disabled = true;
+        phenoBtns.appendChild(pbtn);
+        phenoSec.classList.remove("hidden");
+      }
+    });
+  });
+  // 画像名表示
+  for(let i=1;i<=3;i++) {
+    document.getElementById("file"+i).addEventListener("change", function(){
+      const el = document.getElementById("file"+i+"name");
+      el.textContent = this.files.length ? this.files[0].name : "";
+    });
+  }
+  // 郵便番号→住所自動
+  window.fetchAddress = async function(zipId, prefId, cityId) {
+    const zip = document.getElementById(zipId).value.replace(/[^\d]/g,"");
+    if (zip.length !== 7) {
+      alert("郵便番号は7桁で入力してください");
+      return;
+    }
+    try {
+      // 使用API: zipcloud
+      const res = await fetch(`https://zipcloud.ibsnet.co.jp/api/search?zipcode=${zip}`);
+      const d = await res.json();
+      if(d.results && d.results[0]) {
+        document.getElementById(prefId).value = d.results[0].address1;
+        document.getElementById(cityId).value = d.results[0].address2;
+      } else {
+        alert("該当する住所が見つかりませんでした");
+      }
+    } catch {
+      alert("郵便番号検索に失敗しました");
+    }
+  };
+  // 使用期間自動計算
+  function updatePeriodCalc(){
+    const y = parseInt(document.getElementById('startYear').value,10);
+    const m = parseInt(document.getElementById('startMonth').value,10)||1; // 月が未入力なら1月
+    const d = parseInt(document.getElementById('startDay').value,10)||1; // 日が未入力なら1日
+    if(isNaN(y) || y<1900) {
+      document.getElementById('periodYears').value='';
+      document.getElementById('periodMonths').value='';
+      return;
+    }
+    const start = new Date(y, m-1, d);
+    const now = new Date();
+    let years = now.getFullYear()-start.getFullYear();
+    let months = now.getMonth()-start.getMonth();
+    if(months<0){ years--; months+=12; }
+    if((months===0)&&(now.getDate()<start.getDate())){ years--; months=11; }
+    if(years<0){ years=0; months=0; }
+    document.getElementById('periodYears').value=years;
+    document.getElementById('periodMonths').value=months;
+  }
+  document.getElementById('startYear').addEventListener("change",updatePeriodCalc);
+  document.getElementById('startMonth').addEventListener("change",updatePeriodCalc);
+  document.getElementById('startDay').addEventListener("change",updatePeriodCalc);
+  // 初期計算実行
+  updatePeriodCalc();
+});
+</script>
+</body>
+</html>
